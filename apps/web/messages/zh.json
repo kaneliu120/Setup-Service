@@ -1,0 +1,8 @@
+{
+  "common": {
+    "appName": "MySkillStore",
+    "admin": "管理",
+    "login": "登录",
+    "logout": "退出"
+  }
+}

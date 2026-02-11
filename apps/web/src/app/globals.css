@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* iOS safe area bottom padding for modals */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}

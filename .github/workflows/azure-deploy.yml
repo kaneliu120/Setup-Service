@@ -73,12 +73,6 @@ jobs:
         cd apps/api
         npm run build
         
-    - name: Run Database Seeding
-      run: |
-        cd apps/api
-        # 设置临时环境变量用于本地执行（或跳过，让 Azure 侧执行）
-        # 这里我们更倾向于在部署后或作为部署的一部分运行
-        
     - name: Prepare API Package
       run: |
         mkdir -p deploy_api

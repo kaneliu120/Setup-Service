@@ -1,0 +1,53 @@
+name: Deploy to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: setup-service-web
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  NODE_VERSION: '20.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build Web App
+      run: |
+        cd apps/web
+        npm run build
+        # 移动构建产物到根目录准备部署
+        mkdir -p ../../deploy
+        cp -r .next ../../deploy/.next
+        cp -r public ../../deploy/public
+        cp package.json ../../deploy/package.json
+        cp next.config.ts ../../deploy/next.config.ts
+        # 安装生产依赖
+        cd ../../deploy
+        npm install --production
+
+    - name: Archive artifacts
+      run: |
+        cd deploy
+        zip -r release.zip .
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: deploy/release.zip

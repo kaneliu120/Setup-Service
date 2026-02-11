@@ -17,7 +17,9 @@ import { BookingsModule } from './bookings/bookings.module';
       database: process.env.DB_NAME || 'myskillstore',
       autoLoadEntities: true,
       synchronize: true, // Dev only — use migrations in production
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
     JwtModule.register({
       global: true,

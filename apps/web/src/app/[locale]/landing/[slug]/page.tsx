@@ -1,50 +1,52 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import api from '@/lib/api';
 import LandingPageTemplate, { LandingPageData } from '@/components/landing/LandingPageTemplate';
-import { Loader2 } from 'lucide-react';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-export default function LandingPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const [data, setData] = useState<LandingPageData | null>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
+interface PageProps {
+  params: Promise<{ locale: string; slug: string }>;
+}
 
-  useEffect(() => {
-    const fetchPage = async () => {
-      try {
-        const res = await api.get(`/landing-pages/public/${slug}`);
-        setData(res.data.content);
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
+async function getPageData(slug: string) {
+  try {
+    const res = await api.get(`/landing-pages/public/${slug}`);
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const page = await getPageData(slug);
+
+  if (!page) {
+    return {
+      title: 'Page Not Found',
     };
-    fetchPage();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-      </div>
-    );
   }
 
-  if (error || !data) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center text-gray-400">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">404</h1>
-          <p>This page does not exist or is not active.</p>
-        </div>
-      </div>
-    );
+  const content = typeof page.content === 'string' ? JSON.parse(page.content) : page.content;
+
+  return {
+    title: page.title,
+    description: content.subheadline || 'Private AI Assistant Setup Service',
+    openGraph: {
+      title: page.title,
+      description: content.subheadline,
+    },
+  };
+}
+
+export default async function LandingPage({ params }: PageProps) {
+  const { slug } = await params;
+  const page = await getPageData(slug);
+
+  if (!page) {
+    notFound();
   }
+
+  const data = typeof page.content === 'string' ? JSON.parse(page.content) : page.content;
 
   return <LandingPageTemplate data={{ ...data, slug }} />;
 }

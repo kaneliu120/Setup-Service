@@ -3,7 +3,7 @@ import axios from 'axios';
 const getBaseURL = () => {
   // Server-side: use the full backend URL
   if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || 'https://setup-service-api.azurewebsites.net';
+    return process.env.NEXT_PUBLIC_API_URL || 'https://ssv2-api.azurewebsites.net';
   }
   // Client-side: use relative path (proxied via rewrites)
   return '/api';

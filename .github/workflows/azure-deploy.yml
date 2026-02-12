@@ -1,4 +1,4 @@
-name: Deploy to Azure Web Apps
+name: Deploy to Azure (API + Web)
 
 on:
   push:
@@ -7,53 +7,9 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: setup-service-web
-  AZURE_API_NAME: setup-service-api
   NODE_VERSION: '20.x'
 
 jobs:
-  build-and-deploy-web:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-
-    - name: Install Dependencies
-      run: npm ci
-
-    - name: Build Web App
-      run: |
-        cd apps/web
-        npm run build
-        
-    - name: Prepare Web Package
-      run: |
-        mkdir -p deploy_web
-        cp -r apps/web/.next/standalone/. deploy_web/
-        cp -r apps/web/public deploy_web/apps/web/public || true
-        cp -r apps/web/.next/static deploy_web/apps/web/.next/static || true
-        
-    - name: Archive Web
-      run: |
-        cd deploy_web
-        zip -r ../release_web.zip .
-
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Deploy Web to Azure
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: release_web.zip
-
   build-and-deploy-api:
     runs-on: ubuntu-latest
     steps:
@@ -72,28 +28,74 @@ jobs:
       run: |
         cd apps/api
         npm run build
-        
+
     - name: Prepare API Package
       run: |
         mkdir -p deploy_api
         cp -r apps/api/dist deploy_api/
         cp apps/api/package.json deploy_api/
-        # 安装生产依赖
         cd deploy_api
         npm install --production
-        
+
     - name: Archive API
       run: |
         cd deploy_api
         zip -r ../release_api.zip .
 
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
     - name: Deploy API to Azure
       uses: azure/webapps-deploy@v3
       with:
-        app-name: ${{ env.AZURE_API_NAME }}
+        app-name: ssv2-api
+        publish-profile: ${{ secrets.AZURE_API_PUBLISH_PROFILE }}
         package: release_api.zip
+
+  build-and-deploy-web:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build Web
+      run: |
+        cd apps/web
+        NEXT_PUBLIC_API_URL=https://ssv2-api.azurewebsites.net npm run build
+
+    - name: Prepare Web Package
+      run: |
+        mkdir -p deploy_web
+        # Copy standalone server
+        cp -r apps/web/.next/standalone/* deploy_web/
+        cp -r apps/web/.next/standalone/apps/web/* deploy_web/ 2>/dev/null || true
+        # Copy static assets
+        mkdir -p deploy_web/apps/web/.next
+        cp -r apps/web/.next/static deploy_web/apps/web/.next/static
+        # Copy public folder
+        cp -r apps/web/public deploy_web/apps/web/public 2>/dev/null || true
+        # Create startup script
+        cat > deploy_web/startup.sh << 'EOF'
+        cd /home/site/wwwroot
+        export PORT=8080
+        export HOSTNAME=0.0.0.0
+        node apps/web/server.js
+        EOF
+        chmod +x deploy_web/startup.sh
+
+    - name: Archive Web
+      run: |
+        cd deploy_web
+        zip -r ../release_web.zip .
+
+    - name: Deploy Web to Azure
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ssv2-web
+        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
+        package: release_web.zip

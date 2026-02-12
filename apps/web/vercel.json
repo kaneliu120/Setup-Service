@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://setup-service-api.azurewebsites.net/:path*"
+      "destination": "https://ssv2-api.azurewebsites.net/:path*"
     }
   ]
 }

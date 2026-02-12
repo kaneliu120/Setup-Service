@@ -805,6 +805,13 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
           style={{ background: `radial-gradient(circle, ${primaryColor}, transparent)` }}
         />
         <div className="container mx-auto max-w-lg text-center relative z-10">
+          <div className="mb-8 flex justify-center">
+            <img
+              src="https://media.discordapp.net/attachments/1470965617749262379/1471495779259646012/da7e2cce-d5d1-4ad8-9728-3b059d5c6916.png"
+              alt="Automated Solutions"
+              className="rounded-2xl shadow-2xl max-w-full sm:max-w-md w-full h-auto object-cover"
+            />
+          </div>
           <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">{t(data.cta_title, activeLang)}</h3>
           <p className="text-gray-400 text-sm sm:text-base mb-8 sm:mb-10">{t(data.cta_description, activeLang)}</p>
           <div className="space-y-3 sm:space-y-4">

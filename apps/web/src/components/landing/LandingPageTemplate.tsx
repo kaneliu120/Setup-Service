@@ -659,11 +659,12 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
         <div className="container mx-auto max-w-3xl text-center relative z-10">
           {data.location_label && (
             <span
-              className="inline-flex items-center gap-1.5 text-xs px-3 sm:px-4 py-1.5 rounded-full mb-5 sm:mb-6 border"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full mb-5 sm:mb-6 border shadow-lg"
               style={{
-                color: primaryColor,
-                borderColor: `${primaryColor}40`,
-                background: `${primaryColor}10`,
+                color: '#ffffff',
+                borderColor: `${primaryColor}80`,
+                background: `${primaryColor}cc`,
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
               }}
             >
               {data.location_label}
@@ -770,8 +771,8 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
           <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 sm:p-8 text-center">
             <h3 className="text-lg sm:text-xl font-bold text-white mb-3">{t(data.pricing_title, activeLang)}</h3>
             <div
-              className="text-3xl sm:text-4xl md:text-5xl font-extrabold my-5 sm:my-6"
-              style={{ color: primaryColor }}
+              className="text-5xl sm:text-6xl md:text-7xl font-black my-6 sm:my-8 tracking-tight drop-shadow-lg"
+              style={{ color: '#ffffff', textShadow: `0 0 40px ${primaryColor}80, 0 0 80px ${primaryColor}40` }}
             >
               {t(data.pricing_amount, activeLang)}
             </div>
@@ -824,7 +825,7 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-gray-900/60 border border-gray-800/50 hover:border-gray-700 transition-all group gap-3 min-h-[56px]"
+                  className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-gray-800/80 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 transition-all group gap-3 min-h-[56px]"
                 >
                   <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
                     <div
@@ -836,8 +837,8 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
                     <span className="text-gray-300 text-sm hidden sm:inline">{method.label}</span>
                   </div>
                   <span
-                    className="font-medium text-[13px] sm:text-sm group-hover:underline truncate min-w-0"
-                    style={{ color: primaryColor }}
+                    className="font-bold text-sm sm:text-base group-hover:underline truncate min-w-0"
+                    style={{ color: '#e0e7ff' }}
                   >
                     {method.value}
                   </span>

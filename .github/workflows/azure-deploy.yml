@@ -34,8 +34,8 @@ jobs:
         mkdir -p deploy_api
         cp -r apps/api/dist deploy_api/
         cp apps/api/package.json deploy_api/
-        cd deploy_api
-        npm install --production
+        # Copy node_modules from root (monorepo)
+        cp -r node_modules deploy_api/node_modules
 
     - name: Archive API
       run: |
@@ -49,7 +49,7 @@ jobs:
 
     - name: Deploy API to Azure
       run: |
-        az webapp deploy --resource-group setup-service-v2-rg --name ssv2-api --src-path release_api.zip --type zip
+        az webapp deploy --resource-group setup-service-v2-rg --name ssv2-api --src-path release_api.zip --type zip --async true
 
   build-and-deploy-web:
     runs-on: ubuntu-latest
@@ -73,9 +73,8 @@ jobs:
     - name: Prepare Web Package
       run: |
         mkdir -p deploy_web
-        # Copy standalone server
+        # Copy standalone output (includes node_modules)
         cp -r apps/web/.next/standalone/* deploy_web/
-        cp -r apps/web/.next/standalone/apps/web/* deploy_web/ 2>/dev/null || true
         # Copy static assets
         mkdir -p deploy_web/apps/web/.next
         cp -r apps/web/.next/static deploy_web/apps/web/.next/static
@@ -94,4 +93,4 @@ jobs:
 
     - name: Deploy Web to Azure
       run: |
-        az webapp deploy --resource-group setup-service-v2-rg --name ssv2-web --src-path release_web.zip --type zip
+        az webapp deploy --resource-group setup-service-v2-rg --name ssv2-web --src-path release_web.zip --type zip --async true

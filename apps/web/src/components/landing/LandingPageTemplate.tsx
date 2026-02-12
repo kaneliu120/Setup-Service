@@ -807,7 +807,7 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
         <div className="container mx-auto max-w-lg text-center relative z-10">
           <div className="mb-8 flex justify-center">
             <img
-              src="https://media.discordapp.net/attachments/1470965617749262379/1471495779259646012/da7e2cce-d5d1-4ad8-9728-3b059d5c6916.png"
+              src="/images/cta-office.png"
               alt="Automated Solutions"
               className="rounded-2xl shadow-2xl max-w-full sm:max-w-md w-full h-auto object-cover"
             />

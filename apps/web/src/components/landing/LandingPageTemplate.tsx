@@ -23,6 +23,7 @@ interface ContactMethod {
 interface FaqItem {
   title: string | string[];
   content: string | string[];
+  image?: string;
 }
 
 /** A translatable field: either a plain string or an array of strings (one per language). */
@@ -506,31 +507,50 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
       {items.map((item, idx) => {
         const isOpen = openIndex === idx;
         return (
           <div
             key={idx}
-            className="border border-gray-800/60 rounded-xl overflow-hidden transition-all"
-            style={isOpen ? { borderColor: `${primaryColor}40` } : {}}
+            className={`
+              rounded-xl overflow-hidden transition-all duration-300
+              ${isOpen ? 'bg-gray-800/40 border-indigo-500/30 shadow-lg' : 'bg-gray-900/40 border-gray-800/40 hover:bg-gray-800/60'}
+              border
+            `}
+            style={isOpen ? { borderColor: `${primaryColor}60`, boxShadow: `0 4px 20px -5px ${primaryColor}20` } : {}}
           >
             <button
               onClick={() => setOpenIndex(isOpen ? null : idx)}
-              className="w-full flex items-center justify-between px-4 py-3.5 sm:px-5 sm:py-4 text-left hover:bg-gray-900/40 transition-colors min-h-[48px]"
+              className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors min-h-[56px] group"
             >
-              <span className="text-white font-medium text-[13px] sm:text-sm pr-3 leading-snug">{tFaq(item.title, langIdx)}</span>
-              <ChevronDown
-                className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0 transition-transform duration-300"
-                style={isOpen ? { transform: 'rotate(180deg)', color: primaryColor } : {}}
-              />
+              <span className={`font-medium text-[14px] sm:text-[15px] pr-4 leading-snug transition-colors ${isOpen ? 'text-white' : 'text-gray-200 group-hover:text-white'}`}>
+                {tFaq(item.title, langIdx)}
+              </span>
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? 'bg-indigo-500/20 rotate-180' : 'bg-gray-800 text-gray-400 group-hover:bg-gray-700'}`}
+                style={isOpen ? { backgroundColor: `${primaryColor}20`, color: primaryColor } : {}}
+              >
+                <ChevronDown className="w-4 h-4" />
+              </div>
             </button>
             <div
-              className="overflow-hidden transition-all duration-300 ease-in-out"
-              style={{ maxHeight: isOpen ? '500px' : '0px' }}
+              className={`grid transition-[grid-template-rows,opacity,padding] duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pb-5' : 'grid-rows-[0fr] opacity-0 pb-0'}`}
             >
-              <div className="px-4 pb-3.5 sm:px-5 sm:pb-4 text-gray-400 text-[13px] sm:text-sm leading-relaxed whitespace-pre-line">
-                {tFaq(item.content, langIdx)}
+              <div className="overflow-hidden px-5 min-h-0">
+                {item.image && (
+                  <div className="mb-4 rounded-lg overflow-hidden border border-gray-700/50 shadow-sm relative w-full aspect-video bg-gray-800">
+                    <img
+                      src={item.image}
+                      alt="FAQ Illustration"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <div className="text-gray-400 text-[13px] sm:text-sm leading-relaxed whitespace-pre-line">
+                  {tFaq(item.content, langIdx)}
+                </div>
               </div>
             </div>
           </div>

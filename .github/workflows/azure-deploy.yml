@@ -42,12 +42,14 @@ jobs:
         cd deploy_api
         zip -r ../release_api.zip .
 
-    - name: Deploy API to Azure
-      uses: azure/webapps-deploy@v3
+    - name: Azure Login
+      uses: azure/login@v2
       with:
-        app-name: ssv2-api
-        publish-profile: ${{ secrets.AZURE_API_PUBLISH_PROFILE }}
-        package: release_api.zip
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy API to Azure
+      run: |
+        az webapp deploy --resource-group setup-service-v2-rg --name ssv2-api --src-path release_api.zip --type zip
 
   build-and-deploy-web:
     runs-on: ubuntu-latest
@@ -79,23 +81,17 @@ jobs:
         cp -r apps/web/.next/static deploy_web/apps/web/.next/static
         # Copy public folder
         cp -r apps/web/public deploy_web/apps/web/public 2>/dev/null || true
-        # Create startup script
-        cat > deploy_web/startup.sh << 'EOF'
-        cd /home/site/wwwroot
-        export PORT=8080
-        export HOSTNAME=0.0.0.0
-        node apps/web/server.js
-        EOF
-        chmod +x deploy_web/startup.sh
 
     - name: Archive Web
       run: |
         cd deploy_web
         zip -r ../release_web.zip .
 
-    - name: Deploy Web to Azure
-      uses: azure/webapps-deploy@v3
+    - name: Azure Login
+      uses: azure/login@v2
       with:
-        app-name: ssv2-web
-        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
-        package: release_web.zip
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Web to Azure
+      run: |
+        az webapp deploy --resource-group setup-service-v2-rg --name ssv2-web --src-path release_web.zip --type zip

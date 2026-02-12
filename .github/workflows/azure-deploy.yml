@@ -30,6 +30,8 @@ jobs:
       run: |
         cd apps/web
         npm run build
+      env:
+        NEXT_PUBLIC_API_URL: https://setup-service-api.azurewebsites.net
         
     - name: Prepare Web Package
       run: |

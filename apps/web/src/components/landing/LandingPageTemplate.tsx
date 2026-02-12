@@ -10,8 +10,8 @@ import api from '@/lib/api';
 
 interface ServiceItem {
   icon: string;
-  title: string;
-  description: string;
+  title: string | string[];
+  description: string | string[];
 }
 
 interface ContactMethod {
@@ -757,8 +757,8 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
                     <span className="text-xl sm:text-2xl">{service.icon}</span>
                   </span>
                 </div>
-                <h4 className="text-base sm:text-lg font-semibold text-white mb-1.5 sm:mb-2">{service.title}</h4>
-                <p className="text-[13px] sm:text-sm text-gray-400 leading-relaxed">{service.description}</p>
+                <h4 className="text-base sm:text-lg font-semibold text-white mb-1.5 sm:mb-2">{t(service.title, activeLang)}</h4>
+                <p className="text-[13px] sm:text-sm text-gray-400 leading-relaxed">{t(service.description, activeLang)}</p>
               </div>
             ))}
           </div>

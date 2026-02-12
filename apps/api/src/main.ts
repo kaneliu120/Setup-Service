@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { AuthService } from './auth/auth.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,14 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  // Seed admin user on startup
+  try {
+    const authService = app.get(AuthService);
+    await authService.seedAdmin();
+  } catch (err) {
+    console.error('Seed admin failed:', err);
+  }
 
   const port = process.env.PORT || 3001;
   await app.listen(port);

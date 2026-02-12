@@ -47,13 +47,20 @@ export class AuthService {
   }
 
   async seedAdmin() {
-    const admin = await this.userRepository.findOne({ where: { role: 'admin' } });
+    let admin = await this.userRepository.findOne({ where: { email: 'admin@myskillstore.com' } });
+    const hashed = await bcrypt.hash('admin123', 10);
     if (!admin) {
-      const hashed = await bcrypt.hash('admin123', 10);
       await this.userRepository.save(
         this.userRepository.create({ email: 'admin@myskillstore.com', password: hashed, role: 'admin' }),
       );
-      console.log('Admin user seeded: admin@myskillstore.com / admin123');
+      console.log('Admin user created: admin@myskillstore.com / admin123');
+    } else if (admin.role !== 'admin') {
+      admin.role = 'admin';
+      admin.password = hashed;
+      await this.userRepository.save(admin);
+      console.log('Admin user role/password reset: admin@myskillstore.com / admin123');
+    } else {
+      console.log('Admin user already exists');
     }
   }
 }

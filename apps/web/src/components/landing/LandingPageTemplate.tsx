@@ -506,10 +506,11 @@ function ReferralModal({
 function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryColor: string; langIdx: number }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const leftItems = items.filter((_, i) => i % 2 === 0);
-  const rightItems = items.filter((_, i) => i % 2 === 1);
-  const leftIndices = items.map((_, i) => i).filter(i => i % 2 === 0);
-  const rightIndices = items.map((_, i) => i).filter(i => i % 2 === 1);
+  const mid = Math.ceil(items.length / 2);
+  const leftItems = items.slice(0, mid);
+  const rightItems = items.slice(mid);
+  const leftIndices = leftItems.map((_, i) => i);
+  const rightIndices = rightItems.map((_, i) => i + mid);
 
   const renderCard = (item: FaqItem, idx: number) => {
         const isOpen = openIndex === idx;

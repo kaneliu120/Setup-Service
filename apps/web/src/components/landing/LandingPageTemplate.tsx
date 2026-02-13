@@ -507,14 +507,14 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="columns-1 md:columns-2 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-start">
       {items.map((item, idx) => {
         const isOpen = openIndex === idx;
         return (
           <div
             key={idx}
             className={`
-              rounded-xl overflow-hidden transition-all duration-300 break-inside-avoid
+              rounded-xl overflow-hidden transition-all duration-300
               ${isOpen ? 'bg-gray-800/40 border-indigo-500/30 shadow-lg' : 'bg-gray-900/40 border-gray-800/40 hover:bg-gray-800/60'}
               border
             `}

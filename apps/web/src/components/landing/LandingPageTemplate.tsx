@@ -506,9 +506,12 @@ function ReferralModal({
 function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryColor: string; langIdx: number }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-start">
-      {items.map((item, idx) => {
+  const leftItems = items.filter((_, i) => i % 2 === 0);
+  const rightItems = items.filter((_, i) => i % 2 === 1);
+  const leftIndices = items.map((_, i) => i).filter(i => i % 2 === 0);
+  const rightIndices = items.map((_, i) => i).filter(i => i % 2 === 1);
+
+  const renderCard = (item: FaqItem, idx: number) => {
         const isOpen = openIndex === idx;
         return (
           <div
@@ -564,7 +567,16 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
             </div>
           </div>
         );
-      })}
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
+        {leftItems.map((item, i) => renderCard(item, leftIndices[i]))}
+      </div>
+      <div className="flex flex-col gap-3 sm:gap-4">
+        {rightItems.map((item, i) => renderCard(item, rightIndices[i]))}
+      </div>
     </div>
   );
 }

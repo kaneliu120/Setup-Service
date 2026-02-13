@@ -549,7 +549,16 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
                   </div>
                 )}
                 <div className="text-gray-400 text-[13px] sm:text-sm leading-relaxed whitespace-pre-line">
-                  {tFaq(item.content, langIdx)}
+                  {(() => {
+                    const raw = tFaq(item.content, langIdx);
+                    const parts = raw.split(/\*\*(.*?)\*\*/g);
+                    if (parts.length === 1) return raw;
+                    return parts.map((part, i) =>
+                      i % 2 === 1
+                        ? <strong key={i} className="text-lg text-white font-bold">{part}</strong>
+                        : part
+                    );
+                  })()}
                 </div>
               </div>
             </div>

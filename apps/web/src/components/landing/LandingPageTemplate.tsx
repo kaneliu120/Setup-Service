@@ -7,6 +7,19 @@ import {
   Share2, Heart, Copy, CheckCheck
 } from 'lucide-react';
 import api from '@/lib/api';
+import {
+  trackWhatsAppClick,
+  trackTelegramClick,
+  trackEmailClick,
+  trackPhoneClick,
+  trackConsultClick,
+  trackBookClick,
+  trackConsultationSubmit,
+  trackBookingSubmit,
+  trackShareClick,
+  trackScrollToContact,
+  trackFaqOpen,
+} from '@/lib/tracking';
 
 interface ServiceItem {
   icon: string;
@@ -199,6 +212,7 @@ function ConsultationModal({
         source_slug: slug,
       });
       setSent(true);
+      trackConsultationSubmit();
     } catch (err) {
       console.error('Failed to send consultation:', err);
       alert(ml(L.failAlert, langIdx));
@@ -311,6 +325,7 @@ function BookingModal({
         source_slug: slug,
       });
       setSent(true);
+      trackBookingSubmit();
     } catch (err) {
       console.error('Booking failed:', err);
       alert(ml(L.failAlert, langIdx));
@@ -516,7 +531,10 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
             style={isOpen ? { borderColor: `${primaryColor}40` } : {}}
           >
             <button
-              onClick={() => setOpenIndex(isOpen ? null : idx)}
+              onClick={() => {
+                setOpenIndex(isOpen ? null : idx);
+                if (!isOpen) trackFaqOpen(idx);
+              }}
               className="w-full flex items-center justify-between px-4 py-3.5 sm:px-5 sm:py-4 text-left hover:bg-gray-900/40 transition-colors min-h-[48px]"
             >
               <span className="text-white font-medium text-[13px] sm:text-sm pr-3 leading-snug">{tFaq(item.title, langIdx)}</span>
@@ -549,7 +567,26 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
   const primaryColor = data.primary_color || '#6366f1';
   const accentColor = data.accent_color || '#8b5cf6';
 
+  // ─── Scroll-to-contact tracking ───
+  useEffect(() => {
+    const contactSection = document.getElementById('contact');
+    if (!contactSection) return;
+    let tracked = false;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !tracked) {
+          tracked = true;
+          trackScrollToContact();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(contactSection);
+    return () => observer.disconnect();
+  }, []);
+
   const handleShareClick = async () => {
+    trackShareClick();
     try {
       // Copy current page URL to clipboard
       const url = window.location.href;
@@ -574,6 +611,7 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
   };
 
   const handleConsultClick = () => {
+    trackConsultClick();
     // Try to detect if user has Telegram or WhatsApp
     // On mobile, try deep link. On desktop, fallback to modal.
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -696,7 +734,7 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
             {/* Booking Button */}
             <div className="text-center w-full sm:w-auto">
               <button
-                onClick={() => setShowBookingModal(true)}
+                onClick={() => { trackBookClick(); setShowBookingModal(true); }}
                 className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full text-white font-semibold text-sm sm:text-base whitespace-nowrap transition-all hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/25 active:scale-95 min-h-[48px]"
                 style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}
               >
@@ -824,6 +862,12 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (method.type === 'whatsapp') trackWhatsAppClick();
+                    else if (method.type === 'telegram') trackTelegramClick();
+                    else if (method.type === 'email') trackEmailClick();
+                    else if (method.type === 'phone') trackPhoneClick();
+                  }}
                   className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-gray-900/60 border border-gray-800/50 hover:border-gray-700 transition-all group gap-3 min-h-[56px]"
                 >
                   <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">

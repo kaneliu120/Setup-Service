@@ -8,6 +8,34 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 
+// Declare gtag as a global function
+declare global {
+  interface Window {
+    gtag: (
+      command: 'event',
+      action: string,
+      params?: {
+        event_category?: string;
+        event_label?: string;
+        value?: number;
+        currency?: string;
+        [key: string]: any;
+      }
+    ) => void;
+  }
+}
+
+// Helper to safely track events
+const trackEvent = (eventName: string, value?: number, label?: string) => {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', eventName, {
+      value: value,
+      currency: 'PHP',
+      event_label: label,
+    });
+  }
+};
+
 interface ServiceItem {
   icon: string;
   title: string | string[];
@@ -200,6 +228,9 @@ function ConsultationModal({
         source_slug: slug,
       });
       setSent(true);
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'consultation_submit', { value: 2500, currency: 'PHP' });
+      }
     } catch (err) {
       console.error('Failed to send consultation:', err);
       alert(ml(L.failAlert, langIdx));
@@ -312,6 +343,9 @@ function BookingModal({
         source_slug: slug,
       });
       setSent(true);
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'booking_submit', { value: 5000, currency: 'PHP' });
+      }
     } catch (err) {
       console.error('Booking failed:', err);
       alert(ml(L.failAlert, langIdx));
@@ -512,8 +546,17 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
   const leftIndices = leftItems.map((_, i) => i);
   const rightIndices = rightItems.map((_, i) => i + mid);
 
+  const handleFaqClick = (idx: number, title: string) => {
+    const isOpen = openIndex === idx;
+    setOpenIndex(isOpen ? null : idx);
+    if (!isOpen && typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'faq_open', { event_label: title });
+    }
+  };
+
   const renderCard = (item: FaqItem, idx: number) => {
         const isOpen = openIndex === idx;
+        const itemTitle = tFaq(item.title, langIdx);
         return (
           <div
             key={idx}
@@ -525,11 +568,11 @@ function FaqGrid({ items, primaryColor, langIdx }: { items: FaqItem[]; primaryCo
             style={isOpen ? { borderColor: `${primaryColor}60`, boxShadow: `0 4px 20px -5px ${primaryColor}20` } : {}}
           >
             <button
-              onClick={() => setOpenIndex(isOpen ? null : idx)}
+              onClick={() => handleFaqClick(idx, itemTitle)}
               className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors min-h-[56px] group"
             >
               <span className={`font-medium text-[14px] sm:text-[15px] pr-4 leading-snug transition-colors ${isOpen ? 'text-white' : 'text-gray-200 group-hover:text-white'}`}>
-                {tFaq(item.title, langIdx)}
+                {itemTitle}
               </span>
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? 'bg-indigo-500/20 rotate-180' : 'bg-gray-800 text-gray-400 group-hover:bg-gray-700'}`}
@@ -592,6 +635,9 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
   const accentColor = data.accent_color || '#8b5cf6';
 
   const handleShareClick = async () => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'share_click');
+    }
     try {
       // Copy current page URL to clipboard
       const url = window.location.href;
@@ -616,6 +662,9 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
   };
 
   const handleConsultClick = () => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'consult_click', { value: 1500, currency: 'PHP' });
+    }
     // Try to detect if user has Telegram or WhatsApp
     // On mobile, try deep link. On desktop, fallback to modal.
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -656,6 +705,26 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
     // Fallback: show consultation modal
     setShowConsultModal(true);
   };
+
+  const handleBookingClick = () => {
+    setShowBookingModal(true);
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'book_click', { value: 3000, currency: 'PHP' });
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.gtag) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        window.gtag('event', 'scroll_to_contact', { value: 300, currency: 'PHP' });
+        observer.disconnect();
+      }
+    });
+    const section = document.getElementById('contact');
+    if (section) observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans">
@@ -739,7 +808,7 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
             {/* Booking Button */}
             <div className="text-center w-full sm:w-auto">
               <button
-                onClick={() => setShowBookingModal(true)}
+                onClick={handleBookingClick}
                 className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full text-white font-semibold text-sm sm:text-base whitespace-nowrap transition-all hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/25 active:scale-95 min-h-[48px]"
                 style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}
               >
@@ -874,6 +943,20 @@ export default function LandingPageTemplate({ data }: { data: LandingPageData })
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && window.gtag) {
+                      const eventMap: Record<string, { name: string, value: number }> = {
+                        whatsapp: { name: 'whatsapp_click', value: 2500 },
+                        telegram: { name: 'telegram_click', value: 2500 },
+                        email: { name: 'email_click', value: 1500 },
+                        phone: { name: 'phone_click', value: 2000 },
+                      };
+                      const event = eventMap[method.type];
+                      if (event) {
+                        window.gtag('event', event.name, { value: event.value, currency: 'PHP' });
+                      }
+                    }
+                  }}
                   className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-gray-800/80 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 transition-all group gap-3 min-h-[56px]"
                 >
                   <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">

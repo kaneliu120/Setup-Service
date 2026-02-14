@@ -1,3 +1,4 @@
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -56,6 +57,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body className="antialiased">
+        <GoogleAnalytics gaId="G-J08TY14FSJ" />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

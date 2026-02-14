@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Metadata } from 'next';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import '../globals.css';
 
 export const metadata: Metadata = {
@@ -56,6 +57,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <GoogleAnalytics gaId="G-J08TY14FSJ" />
+      </head>
       <body className="antialiased">
         <GoogleAnalytics gaId="G-J08TY14FSJ" />
         <NextIntlClientProvider messages={messages}>

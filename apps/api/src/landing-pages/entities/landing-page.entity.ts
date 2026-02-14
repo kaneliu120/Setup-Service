@@ -53,6 +53,14 @@ export interface LandingPageContent {
   pricing_title: string;
   pricing_amount: string;
   pricing_details: string[];
+  pricing_note?: string | string[];
+
+  faq_title?: string | string[];
+  faq_items?: Array<{
+    title: string | string[];
+    content: string | string[];
+    image?: string;
+  }>;
 
   cta_title: string;
   cta_description: string;

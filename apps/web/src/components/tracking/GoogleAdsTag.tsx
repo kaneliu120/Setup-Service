@@ -1,26 +1,26 @@
 'use client';
 
-import Script from 'next/script';
+// Google Ads tag is now loaded together with GA4 in GoogleAnalytics.tsx
+// This file is kept for future conversion event tracking
 
-// TODO: Replace with your Google Ads Conversion ID after creating Google Ads account
-const GOOGLE_ADS_ID = ''; // Format: AW-XXXXXXXXX
+const GOOGLE_ADS_ID = 'AW-17953051803';
 
+/**
+ * Fire a Google Ads conversion event
+ * Usage: trackConversion('CONVERSION_LABEL') 
+ * You'll get the conversion label when setting up specific conversion actions in Google Ads
+ */
+export function trackGoogleAdsConversion(conversionLabel: string, value?: number) {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', 'conversion', {
+      send_to: `${GOOGLE_ADS_ID}/${conversionLabel}`,
+      value: value || 5000,
+      currency: 'PHP',
+    });
+  }
+}
+
+// No component rendering needed - tag is in GoogleAnalytics.tsx
 export default function GoogleAdsTag() {
-  if (!GOOGLE_ADS_ID) return null;
-
-  return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-        strategy="afterInteractive"
-      />
-      <Script id="google-ads-tag" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('config', '${GOOGLE_ADS_ID}');
-        `}
-      </Script>
-    </>
-  );
+  return null;
 }

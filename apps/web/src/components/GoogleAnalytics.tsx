@@ -16,6 +16,8 @@ export default function GoogleAnalytics({ gaId }: { gaId: string }) {
           gtag('js', new Date());
 
           gtag('config', '${gaId}');
+          gtag('config', 'AW-17953051803');
+          gtag('config', 'GT-TXZCK6WH');
         `}
       </Script>
     </>

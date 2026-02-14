@@ -39,7 +39,7 @@ export default function AdminLogin() {
             <Boxes className="w-7 h-7 text-white" />
           </div>
           <CardTitle className="text-gray-900 text-xl">Admin Login</CardTitle>
-          <CardDescription>Sign in to manage your landing pages</CardDescription>
+          <CardDescription>Sign in to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -49,7 +49,7 @@ export default function AdminLogin() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="admin@myskillstore.com"
+                placeholder="Email"
                 className="mt-1"
                 required
               />

@@ -47,18 +47,19 @@ export class AuthService {
   }
 
   async seedAdmin() {
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Kx$9mP#vL2nQ8wF!';
     let admin = await this.userRepository.findOne({ where: { email: 'admin@myskillstore.com' } });
-    const hashed = await bcrypt.hash('SJoDQvkA/boSz5Vd', 10);
+    const hashed = await bcrypt.hash(adminPassword, 10);
     if (!admin) {
       admin = this.userRepository.create({ email: 'admin@myskillstore.com', password: hashed, role: 'admin' });
       await this.userRepository.save(admin);
-      console.log('Admin user created: admin@myskillstore.com / [SECURE]');
+      console.log('Admin user created');
       return { message: 'Admin created' };
     } else {
       admin.role = 'admin';
       admin.password = hashed;
       await this.userRepository.save(admin);
-      console.log('Admin user password/role reset: admin@myskillstore.com / [SECURE]');
+      console.log('Admin user password/role reset');
       return { message: 'Admin password reset' };
     }
   }

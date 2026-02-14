@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Metadata } from 'next';
+import TrackingScripts from '@/components/tracking';
 import '../globals.css';
 
 export const metadata: Metadata = {
@@ -56,6 +57,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body className="antialiased">
+        <TrackingScripts />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

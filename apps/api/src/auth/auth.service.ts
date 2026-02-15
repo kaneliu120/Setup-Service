@@ -49,11 +49,12 @@ export class AuthService {
   async seedAdmin() {
     const admin = await this.userRepository.findOne({ where: { role: 'admin' } });
     if (!admin) {
-      const hashed = await bcrypt.hash('admin123', 10);
+      const adminPwd = process.env.ADMIN_PASSWORD || 'admin123';
+      const hashed = await bcrypt.hash(adminPwd, 10);
       await this.userRepository.save(
         this.userRepository.create({ email: 'admin@myskillstore.com', password: hashed, role: 'admin' }),
       );
-      console.log('Admin user seeded: admin@myskillstore.com / admin123');
+      console.log('Admin user seeded: admin@myskillstore.com');
     }
   }
 }

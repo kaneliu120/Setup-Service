@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { LandingPagesController } from './landing-pages.controller';
+import { LandingPagesService } from './landing-pages.service';
+import { LandingPage } from './entities/landing-page.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([LandingPage])],
+  controllers: [LandingPagesController],
+  providers: [LandingPagesService],
+})
+export class LandingPagesModule {}

@@ -1,0 +1,96 @@
+name: Deploy to Azure (API + Web)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  build-and-deploy-api:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build API
+      run: |
+        cd apps/api
+        npm run build
+
+    - name: Prepare API Package
+      run: |
+        mkdir -p deploy_api
+        cp -r apps/api/dist deploy_api/
+        cp apps/api/package.json deploy_api/
+        # Copy node_modules from root (monorepo - npm install won't work standalone)
+        cp -r node_modules deploy_api/node_modules
+
+    - name: Archive API
+      run: |
+        cd deploy_api
+        zip -r ../release_api.zip .
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy API to Azure
+      run: |
+        az webapp deploy --resource-group setup-service-rg --name setup-service-api --src-path release_api.zip --type zip --async true
+
+  build-and-deploy-web:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build Web
+      run: |
+        cd apps/web
+        API_URL=https://setup-service-api.azurewebsites.net npm run build
+
+    - name: Prepare Web Package
+      run: |
+        mkdir -p deploy_web
+        # Copy standalone output (includes node_modules)
+        cp -r apps/web/.next/standalone/* deploy_web/
+        # Copy static assets
+        mkdir -p deploy_web/apps/web/.next
+        cp -r apps/web/.next/static deploy_web/apps/web/.next/static
+        # Copy public folder
+        cp -r apps/web/public deploy_web/apps/web/public 2>/dev/null || true
+
+    - name: Archive Web
+      run: |
+        cd deploy_web
+        zip -r ../release_web.zip .
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Web to Azure
+      run: |
+        az webapp deploy --resource-group setup-service-rg --name setup-service-web --src-path release_web.zip --type zip --async true

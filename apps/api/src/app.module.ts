@@ -1,0 +1,45 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
+import { LandingPagesModule } from './landing-pages/landing-pages.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { PortfolioModule } from './portfolio/portfolio.module';
+import { BlogModule } from './blog/blog.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      ...(process.env.DATABASE_URL ? {} : {
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432'),
+        username: process.env.DB_USERNAME || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        database: process.env.DB_NAME || 'myskillstore',
+      }),
+      autoLoadEntities: true,
+      synchronize: process.env.NODE_ENV !== 'production',
+      ssl: process.env.DATABASE_URL
+        ? { rejectUnauthorized: false }
+        : false,
+    }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET || (() => {
+        if (process.env.NODE_ENV === 'production') {
+          console.warn('⚠️  WARNING: JWT_SECRET not set! Using insecure default. Set JWT_SECRET env var in production.');
+        }
+        return 'dev-secret-change-me';
+      })(),
+      signOptions: { expiresIn: '7d' },
+    }),
+    AuthModule,
+    LandingPagesModule,
+    BookingsModule,
+    PortfolioModule,
+    BlogModule,
+  ],
+})
+export class AppModule {}
